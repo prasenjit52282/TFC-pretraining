@@ -6,3 +6,6 @@ datasets
 *.log
 *.pt
 *.zip
+code/baselines/**/*.pkl
+code/experiments_logs/**/*.pt
+gitToken
