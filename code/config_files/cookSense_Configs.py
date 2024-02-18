@@ -20,10 +20,11 @@ class Config(object):
 
         # data parameters
         self.drop_last = True
-        self.batch_size = 128
+        self.batch_size = 512
+        self.steps_per_epoch=256
 
         #Hyperparameters
-        self.TSlength_aligned = 300
+        self.TSlength_aligned = 120
 
         self.target_batch_size = 64      #only for finetuning
         self.num_classes_target = 10     #only for finetuning

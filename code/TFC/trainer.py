@@ -147,6 +147,8 @@ def model_pretrain(model, model_optimizer, criterion, train_loader, config, devi
         writer.add_scalar('pre_train/step/loss_f', loss_f, step)
         writer.add_scalar('pre_train/step/loss_TF', l_TF, step)
 
+        if step%config.steps_per_epoch==0:break
+
     print('Pretraining: overall loss:{}, l_t: {}, l_f:{}, l_c:{}'.format(loss, loss_t, loss_f, l_TF))    
 
     ave_loss = torch.tensor(total_loss).mean()
