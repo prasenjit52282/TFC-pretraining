@@ -9,3 +9,4 @@ datasets
 code/baselines/**/*.pkl
 code/experiments_logs/**/*.pt
 gitToken
+code/experiments_logs/**/runlogs

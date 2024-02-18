@@ -1,7 +1,6 @@
 class Config(object):
     def __init__(self):
         # model configs
-        self.input_channels = 10# 9 #-- not in TFC
         self.kernel_size = 8  #-- not in TFC
         self.stride = 1  #-- not in TFC
         self.final_out_channels = 128  #-- not in TFC
@@ -11,7 +10,8 @@ class Config(object):
         self.features_len = 18   #-- not in TFC
 
         # training configs  ------TFC parameters starts here
-        self.num_epoch = 1000
+        self.input_channels = 10# num gases sensed along with temp and hum
+        self.num_epoch = 100
 
         # optimizer parameters
         self.beta1 = 0.9
@@ -20,7 +20,7 @@ class Config(object):
 
         # data parameters
         self.drop_last = True
-        self.batch_size = 512
+        self.batch_size = 128
 
         #Hyperparameters
         self.TSlength_aligned = 300

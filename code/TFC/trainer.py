@@ -15,7 +15,7 @@ def one_hot_encoding(X):
     return b
 
 def Trainer(model,  model_optimizer, classifier, classifier_optimizer, train_dl, valid_dl, test_dl, device,
-            logger, config, experiment_log_dir, training_mode):
+            logger, config, experiment_log_dir, training_mode, writer):
     # Start training
     logger.debug("Training started ....")
 
@@ -23,11 +23,13 @@ def Trainer(model,  model_optimizer, classifier, classifier_optimizer, train_dl,
     scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(model_optimizer, 'min')
     if training_mode == 'pre_train':
         print('Pretraining on source dataset')
+        step=0
         for epoch in range(1, config.num_epoch + 1):
             # Train and validate
             """Train. In fine-tuning, this part is also trained???"""
-            train_loss = model_pretrain(model, model_optimizer, criterion, train_dl, config, device, training_mode)
+            train_loss,step = model_pretrain(model, model_optimizer, criterion, train_dl, config, device, training_mode, writer, step)
             logger.debug(f'\nPre-training Epoch : {epoch} Train Loss : {train_loss:.4f}')
+            writer.add_scalar('pre_train/epoch/loss', train_loss, epoch)
 
         os.makedirs(os.path.join(experiment_log_dir, "saved_models"), exist_ok=True)
         chkpoint = {'model_state_dict': model.state_dict()}
@@ -103,7 +105,7 @@ def Trainer(model,  model_optimizer, classifier, classifier_optimizer, train_dl,
 
     logger.debug("\n################## Training is Done! #########################")
 
-def model_pretrain(model, model_optimizer, criterion, train_loader, config, device, training_mode,):
+def model_pretrain(model, model_optimizer, criterion, train_loader, config, device, training_mode, writer, step):
     total_loss = []
     model.train()
     global loss, loss_t, loss_f, l_TF, loss_c, data_test, data_f_test
@@ -139,11 +141,17 @@ def model_pretrain(model, model_optimizer, criterion, train_loader, config, devi
         loss.backward()
         model_optimizer.step()
 
-    print('Pretraining: overall loss:{}, l_t: {}, l_f:{}, l_c:{}'.format(loss, loss_t, loss_f, l_TF))
+        step+=1
+        writer.add_scalar('pre_train/step/loss', loss, step)
+        writer.add_scalar('pre_train/step/loss_t', loss_t, step)
+        writer.add_scalar('pre_train/step/loss_f', loss_f, step)
+        writer.add_scalar('pre_train/step/loss_TF', l_TF, step)
+
+    print('Pretraining: overall loss:{}, l_t: {}, l_f:{}, l_c:{}'.format(loss, loss_t, loss_f, l_TF))    
 
     ave_loss = torch.tensor(total_loss).mean()
 
-    return ave_loss
+    return ave_loss,step
 
 
 def model_finetune(model, model_optimizer, val_dl, config, device, training_mode, classifier=None, classifier_optimizer=None):

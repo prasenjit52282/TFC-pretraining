@@ -8,6 +8,8 @@ from utils import _logger
 from model import *
 from dataloader import data_generator
 from trainer import Trainer
+from tensorboardX import SummaryWriter
+
 
 
 
@@ -70,6 +72,14 @@ experiment_log_dir = os.path.join(logs_save_dir, experiment_description, run_des
 # 'experiments_logs/Exp1/run1/train_linear_seed_0'
 os.makedirs(experiment_log_dir, exist_ok=True)
 
+
+#tensorboard
+tbdlogdir=experiment_log_dir+"/runlogs"
+os.makedirs(tbdlogdir, exist_ok=True)
+
+tbdfoldername= os.path.join(tbdlogdir, f"logs_{datetime.now().strftime('%d_%m_%Y_%H_%M_%S')}")
+writer=SummaryWriter(logdir=tbdfoldername)
+
 # loop through domains
 counter = 0
 src_counter = 0
@@ -89,7 +99,7 @@ logger.debug("=" * 45)
 # Load datasets
 sourcedata_path = f"../../datasets/{pretrain_dataset}"
 targetdata_path = f"../../datasets/{targetdata}"
-subset = True  # if subset= true, use a subset for debugging.
+subset = False  # if subset= true, use a subset for debugging. only use 10 times the data from target data
 train_dl, valid_dl, test_dl = data_generator(sourcedata_path, targetdata_path, configs, training_mode, subset = subset)
 logger.debug("Data loaded ...")
 
@@ -114,6 +124,7 @@ classifier_optimizer = torch.optim.Adam(classifier.parameters(), lr=configs.lr, 
 
 # Trainer
 Trainer(TFC_model, model_optimizer, classifier, classifier_optimizer, train_dl, valid_dl, test_dl, device,
-        logger, configs, experiment_log_dir, training_mode)
+        logger, configs, experiment_log_dir, training_mode, writer)
 
 logger.debug(f"Training time is : {datetime.now()-start_time}")
+writer.close()
